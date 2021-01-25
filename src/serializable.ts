@@ -9,7 +9,7 @@ export interface ISerializable {
   fromJSON<T extends ISerializable>(json: any): T;
 }
 
-export abstract class Index implements ISerializable {
+export abstract class Serializable implements ISerializable {
   protected readonly classReference?: string;
   protected readonly className?: string;
 
@@ -23,7 +23,7 @@ export abstract class Index implements ISerializable {
     }
   }
 
-  public static resolve<T extends Index>(className: string, classReference: string): T {
+  public static resolve<T extends Serializable>(className: string, classReference: string): T {
     try {
       const module = require('./' + classReference);
 
@@ -39,8 +39,8 @@ export abstract class Index implements ISerializable {
     }
   }
 
-  public static fromJSON<T extends Index>(this: new (...a) => T, json: string): T;
-  public static fromJSON<T extends Index>(this: new (...a) => T, json: any): T {
+  public static fromJSON<T extends Serializable>(this: new (...a) => T, json: string): T;
+  public static fromJSON<T extends Serializable>(this: new (...a) => T, json: any): T {
     if (typeof json === 'string') {
       return deserialize<T>(json);
     }
@@ -48,8 +48,8 @@ export abstract class Index implements ISerializable {
     return Object.assign(new this(), json);
   }
 
-  public fromJSON<T extends Index>(json: string): T;
-  public fromJSON<T extends Index>(json: any): T {
+  public fromJSON<T extends Serializable>(json: string): T;
+  public fromJSON<T extends Serializable>(json: any): T {
     if (typeof json === 'string') {
       return deserialize<T>(json);
     }
@@ -86,11 +86,11 @@ export function serialize(json: any, std: boolean = false): string {
   return buffer.join(',');
 }
 
-export function deserialize<T extends Index>(json: string | any): T {
+export function deserialize<T extends Serializable>(json: string | any): T {
   return resolve<T>(typeof json === 'string' ? JSON.parse(json) : json);
 }
 
-export function resolve<T extends Index>(object: any): T | any {
+export function resolve<T extends Serializable>(object: any): T | any {
   if (typeof object === 'object') {
     if (Array.isArray(object)) {
       return object.map((e) => resolve(e));
@@ -105,7 +105,7 @@ export function resolve<T extends Index>(object: any): T | any {
       typeof object?.classReference === 'string' &&
       typeof object?.fromJSON !== 'function'
     ) {
-      const classType: T = Index.resolve<T>(object.className, object.classReference);
+      const classType: T = Serializable.resolve<T>(object.className, object.classReference);
       if (classType) {
         object = classType.fromJSON<T>(object);
       }
