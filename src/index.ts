@@ -10,7 +10,6 @@ export interface ISerializable {
 }
 
 export abstract class Index implements ISerializable {
-
   protected readonly classReference?: string;
   protected readonly className?: string;
 
@@ -28,17 +27,9 @@ export abstract class Index implements ISerializable {
     try {
       const module = require('./' + classReference);
 
-      const classType = [
-        module,
-        module?.default,
-        module?.[className],
-      ].find(e => e?.name === className);
+      const classType = [module, module?.default, module?.[className]].find((e) => e?.name === className);
 
-      if (
-        !classType ||
-        typeof classType !== 'function' ||
-        typeof classType.fromJSON !== 'function'
-      ) {
+      if (!classType || typeof classType !== 'function' || typeof classType.fromJSON !== 'function') {
         return null;
       }
 
@@ -48,8 +39,8 @@ export abstract class Index implements ISerializable {
     }
   }
 
-  public static fromJSON<T extends Index>(this: (new (...a) => T), json: string): T
-  public static fromJSON<T extends Index>(this: (new (...a) => T), json: any): T {
+  public static fromJSON<T extends Index>(this: new (...a) => T, json: string): T;
+  public static fromJSON<T extends Index>(this: new (...a) => T, json: any): T {
     if (typeof json === 'string') {
       return deserialize<T>(json);
     }
@@ -57,7 +48,7 @@ export abstract class Index implements ISerializable {
     return Object.assign(new this(), json);
   }
 
-  public fromJSON<T extends Index>(json: string): T
+  public fromJSON<T extends Index>(json: string): T;
   public fromJSON<T extends Index>(json: any): T {
     if (typeof json === 'string') {
       return deserialize<T>(json);
@@ -69,9 +60,7 @@ export abstract class Index implements ISerializable {
   public toJSON(): string {
     return serialize(this, true);
   }
-
 }
-
 
 export function serialize(json: any, std: boolean = false): string {
   const buffer = [];
@@ -104,7 +93,7 @@ export function deserialize<T extends Index>(json: string | any): T {
 export function resolve<T extends Index>(object: any): T | any {
   if (typeof object === 'object') {
     if (Array.isArray(object)) {
-      return object.map(e => resolve(e));
+      return object.map((e) => resolve(e));
     }
 
     for (const [key, value] of Object.entries(object)) {
