@@ -9,7 +9,7 @@ export interface ISerializable {
   fromJSON<T extends ISerializable>(json: any): T;
 }
 
-export abstract class Serializable implements ISerializable {
+export default abstract class Serializable implements ISerializable {
   protected readonly classReference?: string;
   protected readonly className?: string;
 
