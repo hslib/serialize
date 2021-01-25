@@ -10,7 +10,9 @@
     "types": "lib/index.d.ts",
     "scripts": {
         "watch": "tsc -w",
-        "build": "tsc",
+        "compile": "tsc",
+        "clean": "rm -rf lib/*",
+        "build": "npm run clean && npm run compile",
         "format": "prettier --write \"src/**/*.(ts|js)\"",
         "test": "jest --config jestconfig.json",
         "lint": "tslint -p tsconfig.json",
