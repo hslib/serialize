@@ -2,7 +2,7 @@ import callsites from 'callsites';
 import findUp from 'find-up';
 import path from 'path';
 
-const projectRoot = (directory => {
+const projectRoot = ((directory) => {
   const packageJsonFilename = path.join(directory, 'package.json');
   if (findUp.sync.exists(packageJsonFilename)) {
     const packageJson = require(packageJsonFilename);
@@ -11,19 +11,21 @@ const projectRoot = (directory => {
     }
   }
   return directory;
-})(path.dirname(
-  findUp.sync('package.json', {
-    cwd: require.main.path,
-    allowSymlinks: true,
-    type: 'file',
-  })
-  || findUp.sync('node_modules', {
-    cwd: require.main.path,
-    allowSymlinks: true,
-    type: 'directory',
-  })
-  || '',
-));
+})(
+  path.dirname(
+    findUp.sync('package.json', {
+      cwd: require.main.path,
+      allowSymlinks: true,
+      type: 'file',
+    }) ||
+      findUp.sync('node_modules', {
+        cwd: require.main.path,
+        allowSymlinks: true,
+        type: 'directory',
+      }) ||
+      '',
+  ),
+);
 
 export interface ISerializable {
   toJSON(): string;
