@@ -2,7 +2,7 @@ import callsites from 'callsites';
 import findUp from 'find-up';
 import path from 'path';
 
-const __project_dirname = (directory => {
+const project_dirname = (directory => {
   const packageJsonFilename = path.join(directory, 'package.json');
   if(findUp.sync.exists(packageJsonFilename)) {
     const packageJson = require(packageJsonFilename);
@@ -42,14 +42,14 @@ export default abstract class Serializable implements ISerializable {
 
     for (const callsite of callsites()) {
       if (callsite.getFunctionName() === this.constructor.name) {
-        this.classReference = path.relative(__project_dirname, callsite.getFileName()).split('.').slice(0, -1).join('.');
+        this.classReference = path.relative(project_dirname, callsite.getFileName()).split('.').slice(0, -1).join('.');
       }
     }
   }
 
   public static resolve<T extends Serializable>(className: string, classReference: string): T {
     try {
-      const module = require(path.join(__project_dirname, classReference));
+      const module = require(path.join(project_dirname, classReference));
 
       const classType = [module, module?.default, module?.[className]].find((e) => e?.name === className);
 
