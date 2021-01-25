@@ -19,7 +19,6 @@
         "typeRoots": [
         ],
         "types": [
-            "@types/ts-nameof",
             "@types/node",
             "@types/jest"
         ],
@@ -28,17 +27,7 @@
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "outDir": "./lib",
-        "plugins": [
-            {
-                "transform": "ts-nameof",
-                "type": "raw"
-            },
-            {
-                "transform": "tsruntime/dist/transform/transformer.js",
-                "type": "program"
-            }
-        ]
+        "outDir": "./lib"
     },
     "include": [
         "src"
