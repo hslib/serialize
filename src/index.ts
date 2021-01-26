@@ -18,12 +18,12 @@ const projectRoot = ((directory) => {
       allowSymlinks: true,
       type: 'file',
     }) ||
-    findUp.sync('node_modules', {
-      cwd: require.main.path,
-      allowSymlinks: true,
-      type: 'directory',
-    }) ||
-    '',
+      findUp.sync('node_modules', {
+        cwd: require.main.path,
+        allowSymlinks: true,
+        type: 'directory',
+      }) ||
+      '',
   ),
 );
 
