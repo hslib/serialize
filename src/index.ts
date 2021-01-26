@@ -2,7 +2,7 @@ import callsites from 'callsites';
 import findUp from 'find-up';
 import path from 'path';
 
-export declare type Constructor<T extends {} = {}> = new(...args: any[]) => T;
+export declare type Constructor<T extends {} = {}> = new (...args: any[]) => T;
 
 export interface ISerializable {
   toJSON(): string;
@@ -11,7 +11,6 @@ export interface ISerializable {
 
   fromJSON<T extends ISerializable>(json: any): T;
 }
-
 
 export default abstract class Serializable implements ISerializable {
   public static rootDir: string = require.main.path;
@@ -24,7 +23,11 @@ export default abstract class Serializable implements ISerializable {
 
     for (const callsite of callsites()) {
       if (callsite.getFunctionName() === this.constructor.name) {
-        this.classReference = path.relative(Serializable.rootDir, callsite.getFileName()).split('.').slice(0, -1).join('.');
+        this.classReference = path
+          .relative(Serializable.rootDir, callsite.getFileName())
+          .split('.')
+          .slice(0, -1)
+          .join('.');
       }
     }
   }
@@ -130,8 +133,7 @@ export function resolve<T extends Serializable>(object: any): T | any {
   return object;
 }
 
-
-Serializable.rootDir = (directory => {
+Serializable.rootDir = ((directory) => {
   const packageJsonFilename = path.join(directory, 'package.json');
   if (findUp.sync.exists(packageJsonFilename)) {
     const packageJson = require(packageJsonFilename);
@@ -147,11 +149,11 @@ Serializable.rootDir = (directory => {
       allowSymlinks: true,
       type: 'file',
     }) ||
-    findUp.sync('node_modules', {
-      cwd: require.main.path,
-      allowSymlinks: true,
-      type: 'directory',
-    }) ||
-    '',
+      findUp.sync('node_modules', {
+        cwd: require.main.path,
+        allowSymlinks: true,
+        type: 'directory',
+      }) ||
+      '',
   ),
 );
