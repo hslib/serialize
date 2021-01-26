@@ -2,30 +2,7 @@ import callsites from 'callsites';
 import findUp from 'find-up';
 import path from 'path';
 
-const projectRoot = ((directory) => {
-  const packageJsonFilename = path.join(directory, 'package.json');
-  if (findUp.sync.exists(packageJsonFilename)) {
-    const packageJson = require(packageJsonFilename);
-    if (packageJson.main) {
-      directory = path.join(directory, path.dirname(packageJson.main));
-    }
-  }
-  return directory;
-})(
-  path.dirname(
-    findUp.sync('package.json', {
-      cwd: require.main.path,
-      allowSymlinks: true,
-      type: 'file',
-    }) ||
-      findUp.sync('node_modules', {
-        cwd: require.main.path,
-        allowSymlinks: true,
-        type: 'directory',
-      }) ||
-      '',
-  ),
-);
+export declare type Constructor<T extends {} = {}> = new(...args: any[]) => T;
 
 export interface ISerializable {
   toJSON(): string;
@@ -35,7 +12,10 @@ export interface ISerializable {
   fromJSON<T extends ISerializable>(json: any): T;
 }
 
+
 export default abstract class Serializable implements ISerializable {
+  public static rootDir: string = require.main.path;
+
   protected readonly classReference?: string;
   protected readonly className?: string;
 
@@ -44,14 +24,14 @@ export default abstract class Serializable implements ISerializable {
 
     for (const callsite of callsites()) {
       if (callsite.getFunctionName() === this.constructor.name) {
-        this.classReference = path.relative(projectRoot, callsite.getFileName()).split('.').slice(0, -1).join('.');
+        this.classReference = path.relative(Serializable.rootDir, callsite.getFileName()).split('.').slice(0, -1).join('.');
       }
     }
   }
 
   public static resolve<T extends Serializable>(className: string, classReference: string): T {
     try {
-      const module = require(path.join(projectRoot, classReference));
+      const module = require(path.join(Serializable.rootDir, classReference));
 
       const classType = [module, module?.default, module?.[className]].find((e) => e?.name === className);
 
@@ -65,8 +45,8 @@ export default abstract class Serializable implements ISerializable {
     }
   }
 
-  public static fromJSON<T extends Serializable>(this: new (...a) => T, json: string): T;
-  public static fromJSON<T extends Serializable>(this: new (...a) => T, json: any): T {
+  public static fromJSON<T extends Serializable>(this: Constructor<T>, json: string): T;
+  public static fromJSON<T extends Serializable>(this: Constructor<T>, json: any): T {
     if (typeof json === 'string') {
       return deserialize<T>(json);
     }
@@ -149,3 +129,29 @@ export function resolve<T extends Serializable>(object: any): T | any {
 
   return object;
 }
+
+
+Serializable.rootDir = (directory => {
+  const packageJsonFilename = path.join(directory, 'package.json');
+  if (findUp.sync.exists(packageJsonFilename)) {
+    const packageJson = require(packageJsonFilename);
+    if (packageJson.main) {
+      directory = path.join(directory, path.dirname(packageJson.main));
+    }
+  }
+  return directory;
+})(
+  path.dirname(
+    findUp.sync('package.json', {
+      cwd: require.main.path,
+      allowSymlinks: true,
+      type: 'file',
+    }) ||
+    findUp.sync('node_modules', {
+      cwd: require.main.path,
+      allowSymlinks: true,
+      type: 'directory',
+    }) ||
+    '',
+  ),
+);
