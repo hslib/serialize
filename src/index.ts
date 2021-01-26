@@ -18,12 +18,12 @@ const projectRoot = ((directory) => {
       allowSymlinks: true,
       type: 'file',
     }) ||
-      findUp.sync('node_modules', {
-        cwd: require.main.path,
-        allowSymlinks: true,
-        type: 'directory',
-      }) ||
-      '',
+    findUp.sync('node_modules', {
+      cwd: require.main.path,
+      allowSymlinks: true,
+      type: 'directory',
+    }) ||
+    '',
   ),
 );
 
@@ -75,12 +75,10 @@ export default abstract class Serializable implements ISerializable {
   }
 
   public fromJSON<T extends Serializable>(json: string): T;
+  public fromJSON<T extends Serializable>(json: object): T;
+  public fromJSON<T extends Serializable>(json: Buffer): T;
   public fromJSON<T extends Serializable>(json: any): T {
-    if (typeof json === 'string') {
-      return deserialize<T>(json);
-    }
-
-    return Object.assign(this, json);
+    return Object.assign(this, deserialize<T>(json));
   }
 
   public toJSON(): string {
@@ -112,8 +110,19 @@ export function serialize(json: any, std: boolean = false): string {
   return buffer.join(',');
 }
 
-export function deserialize<T extends Serializable>(json: string | any): T {
-  return resolve<T>(typeof json === 'string' ? JSON.parse(json) : json);
+export function deserialize<T extends Serializable>(json: string): T;
+export function deserialize<T extends Serializable>(json: Buffer): T;
+export function deserialize<T extends Serializable>(json: object): T;
+export function deserialize<T extends Serializable>(json: any): T {
+  if (Buffer.isBuffer(json)) {
+    return deserialize<T>((json as Buffer).toString('utf8'));
+  }
+
+  if (typeof json === 'string') {
+    return deserialize<T>(JSON.parse(json));
+  }
+
+  return resolve<T>(json);
 }
 
 export function resolve<T extends Serializable>(object: any): T | any {
